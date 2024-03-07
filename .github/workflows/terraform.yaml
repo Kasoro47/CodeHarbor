@@ -22,7 +22,9 @@ jobs:
 
     - name: Terraform Apply
       env:
-        KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        K8S_HOST: ${{ secrets.K8S_HOST }}
+        K8S_TOKEN: ${{ secrets.K8S_TOKEN }}
+        K8S_CLUSTER_CA_CERTIFICATE: ${{ secrets.K8S_CLUSTER_CA_CERTIFICATE }}
       run: |
         echo "$KUBECONFIG" | base64 -d > ./kubeconfig
         export KUBECONFIG=$PWD/kubeconfig
