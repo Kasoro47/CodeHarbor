@@ -18,8 +18,9 @@ jobs:
 
     - name: Configure Kubeconfig
       run: |
-         echo "${{ secrets.KUBECONFIG }}" | base64 -d > ${{ github.workspace }}/kubeconfig
-         echo "KUBECONFIG=${{ github.workspace }}/kubeconfig" >> $GITHUB_ENV
+        echo ${{ secrets.KUBECONFIG }} | base64 --decode > kubeconfig
+        mkdir -p ~/.kube
+        mv kubeconfig ~/.kube/config
 
     - name: Terraform Init and Apply
       run: |
