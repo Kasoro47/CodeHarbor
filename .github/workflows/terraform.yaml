@@ -34,9 +34,10 @@ jobs:
         wc -l ${{ github.workspace }}/kubeconfig
       working-directory: Terraform-Harbor
 
-    - name: Test Kubernetes Connection
+    - name: Test Kubernetes Connection (Detailed)
       run: |
-        kubectl --kubeconfig=${{ github.workspace }}/kubeconfig get namespaces
+        kubectl --kubeconfig=${{ github.workspace }}/kubeconfig cluster-info
+        kubectl --kubeconfig=${{ github.workspace }}/kubeconfig config view
 
     - name: Terraform Init and Apply
       run: |
