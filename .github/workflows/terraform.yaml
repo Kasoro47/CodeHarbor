@@ -1,4 +1,4 @@
-name: Deploy avec Terraform
+name: Deploy with Terraform and k3s
 
 on:
   push:
@@ -9,23 +9,18 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.0.0
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
 
-    - name: Configure Kubeconfig
-      run: |
-        echo ${{ secrets.KUBECONFIG }} | base64 --decode > kubeconfig
-        mkdir -p ~/.kube
-        mv kubeconfig ~/.kube/config
-
-
-    - name: Terraform Init and Apply
-      run: |
-        terraform init
-        terraform plan
-        terraform apply -auto-approve
-      working-directory: Terraform-Harbor
+      # Assuming Terraform configurations or other steps don't require direct k3s cluster access
+      # Or you're handling Kubernetes access securely within your Terraform configuration
+      - name: Terraform Init and Apply
+        run: |
+          terraform init
+          terraform plan
+          terraform apply -auto-approve
+        working-directory: Terraform-Harbor
