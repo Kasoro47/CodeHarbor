@@ -21,7 +21,14 @@ jobs:
       working-directory: Terraform-Harbor
 
     - name: Terraform Plan
-      run: terraform plan
+      env:
+        K8S_HOST: ${{ secrets.K8S_HOST }}
+        K8S_CLIENT_CERTIFICATE: ${{ secrets.K8S_CLIENT_CERTIFICATE }}
+        K8S_CLIENT_KEY: ${{ secrets.K8S_CLIENT_KEY }}
+        K8S_CLUSTER_CA_CERTIFICATE: ${{ secrets.K8S_CLUSTER_CA_CERTIFICATE }}
+      run: |
+        terraform init
+        terraform apply -auto-approve
       working-directory: Terraform-Harbor
 
     - name: Terraform Apply
