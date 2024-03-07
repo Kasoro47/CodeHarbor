@@ -18,11 +18,12 @@ jobs:
 
     - name: Configure Kubeconfig
       run: |
-        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ${{ github.workspace }}/kubeconfig
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > /home/runner/work/CodeHarbor/CodeHarbor/kubeconfig
         echo "Decoded kubeconfig file content:"
-        cat ${{ github.workspace }}/kubeconfig
-      working-directory: Terraform-Harbor
-
+        cat /home/runner/work/CodeHarbor/CodeHarbor/kubeconfig
+      shell: /usr/bin/bash -e {0}
+      env:
+        TERRAFORM_CLI_PATH: /home/runner/work/_temp/7a21ddb1-1db3-41ab-8f19-78a5c9bbc648
 
     - name: Verify Kubeconfig
       run: |
