@@ -22,6 +22,11 @@ jobs:
         echo "KUBECONFIG=${{ github.workspace }}/kubeconfig" >> $GITHUB_ENV
       working-directory: Terraform-Harbor
 
+    - name: Verify Kubeconfig
+      run: |
+        cat ${{ github.workspace }}/kubeconfig
+      working-directory: Terraform-Harbor
+
     - name: Terraform Init and Apply
       run: |
         terraform init
