@@ -27,6 +27,13 @@ jobs:
         cat ${{ github.workspace }}/kubeconfig
       working-directory: Terraform-Harbor
 
+    - name: Test Kubernetes Connection
+      run: |
+        kubectl cluster-info
+      working-directory: Terraform-Harbor
+      env:
+        KUBECONFIG: ${{ github.workspace }}/kubeconfig
+
     - name: Terraform Init and Apply
       run: |
         terraform init
