@@ -27,12 +27,12 @@ jobs:
         cat ${{ github.workspace }}/kubeconfig
       working-directory: Terraform-Harbor
 
-    - name: Test Kubernetes Connection
+    - name: Debug Kubeconfig
       run: |
-        kubectl cluster-info
+        ls -l ${{ github.workspace }}/kubeconfig
+        echo "Kubeconfig file size:"
+        wc -l ${{ github.workspace }}/kubeconfig
       working-directory: Terraform-Harbor
-      env:
-        KUBECONFIG: ${{ github.workspace }}/kubeconfig
 
     - name: Terraform Init and Apply
       run: |
