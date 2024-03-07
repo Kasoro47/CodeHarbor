@@ -36,9 +36,7 @@ jobs:
 
     - name: Test Kubernetes Connection
       run: |
-        kubectl get namespaces
-      env:
-        KUBECONFIG: ${{ github.workspace }}/kubeconfig
+        kubectl --kubeconfig=${{ github.workspace }}/kubeconfig get namespaces
 
     - name: Terraform Init and Apply
       run: |
