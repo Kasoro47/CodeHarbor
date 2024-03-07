@@ -16,5 +16,5 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build -t kasoro47/my-nginx:v1 .
-        docker push kasoro47/my-nginx:v1
+        docker build -t kasoro/codeharbor:v1 .
+        docker push kasoro/codeharbor:v1
