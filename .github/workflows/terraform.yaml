@@ -16,12 +16,6 @@ jobs:
       with:
         terraform_version: 1.0.0
 
-    - name: Configure Kubeconfig
-      run: |
-        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ${{ github.workspace }}/kubeconfig
-        echo "KUBECONFIG=${{ github.workspace }}/kubeconfig" >> $GITHUB_ENV
-      working-directory: Terraform-Harbor
-
     - name: Verify Kubeconfig
       run: |
         cat ${{ github.workspace }}/kubeconfig
