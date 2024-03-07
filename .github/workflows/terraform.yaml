@@ -34,6 +34,10 @@ jobs:
         wc -l ${{ github.workspace }}/kubeconfig
       working-directory: Terraform-Harbor
 
+    - name: Debug Kubeconfig Server Endpoint
+      run: |
+        grep 'server:' ${{ github.workspace }}/kubeconfig
+
     - name: Test Kubernetes Connection (Detailed)
       run: |
         kubectl --kubeconfig=${{ github.workspace }}/kubeconfig cluster-info
