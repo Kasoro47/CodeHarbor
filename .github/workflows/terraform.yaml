@@ -1,26 +1,11 @@
-name: Deploy with Terraform and k3s
-
-on:
-  push:
-    branches:
-      - develop
-
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.0.0
-
-      # Assuming Terraform configurations or other steps don't require direct k3s cluster access
-      # Or you're handling Kubernetes access securely within your Terraform configuration
-      - name: Terraform Init and Apply
-        run: |
-          terraform init
-          terraform plan
-          terraform apply -auto-approve
-        working-directory: Terraform-Harbor
+    - uses: actions/checkout@v2
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}"
+    - name: Build and push Docker image
+      run: |
+        docker build -t kasoro47/my-nginx:v1 .
+        docker push kasoro47/my-nginx:v1
