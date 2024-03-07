@@ -16,18 +16,22 @@ jobs:
       with:
         terraform_version: 1.0.0
 
+    - name: Configure Kubeconfig
+      env:
+        KUBECONFIG_CONTENTS: ${{ secrets.KUBECONFIG }}
+      run: |
+        echo "$KUBECONFIG_CONTENTS" | base64 -d > ./kubeconfig
+        export KUBECONFIG=$PWD/kubeconfig
+      working-directory: Terraform-Harbor
+
     - name: Terraform Init
       run: terraform init
       working-directory: Terraform-Harbor
 
     - name: Terraform Apply
-      env:
-        K8S_HOST: ${{ secrets.K8S_HOST }}
-        K8S_TOKEN: ${{ secrets.K8S_TOKEN }}
-        K8S_CLUSTER_CA_CERTIFICATE: ${{ secrets.K8S_CLUSTER_CA_CERTIFICATE }}
       run: |
-        echo "$KUBECONFIG" | base64 -d > ./kubeconfig
-        export KUBECONFIG=$PWD/kubeconfig
         terraform plan
         terraform apply -auto-approve
       working-directory: Terraform-Harbor
+      env:
+        KUBECONFIG: ${{ github.workspace }}/Terraform-Harbor/kubeconfig
