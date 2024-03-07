@@ -17,21 +17,16 @@ jobs:
         terraform_version: 1.0.0
 
     - name: Configure Kubeconfig
-      env:
-        KUBECONFIG_CONTENTS: ${{ secrets.KUBECONFIG }}
       run: |
-        echo "$KUBECONFIG_CONTENTS" | base64 -d > ./kubeconfig
-        export KUBECONFIG=$PWD/kubeconfig
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ${{ github.workspace }}/kubeconfig
+        echo "KUBECONFIG=${{ github.workspace }}/kubeconfig" >> $GITHUB_ENV
       working-directory: Terraform-Harbor
 
-    - name: Terraform Init
-      run: terraform init
-      working-directory: Terraform-Harbor
-
-    - name: Terraform Apply
+    - name: Terraform Init and Apply
       run: |
+        terraform init
         terraform plan
         terraform apply -auto-approve
       working-directory: Terraform-Harbor
       env:
-        KUBECONFIG: ${{ github.workspace }}/Terraform-Harbor/kubeconfig
+        KUBECONFIG: ${{ github.workspace }}/kubeconfig
