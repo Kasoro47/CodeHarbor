@@ -18,12 +18,12 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-      working-directory: ./../../Terraform-Harbor
+      working-directory: Terraform-Harbor
 
     - name: Terraform Plan
       run: terraform plan
-      working-directory: ./../../Terraform-Harbor
+      working-directory: Terraform-Harbor
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
-      working-directory: ./../../Terraform-Harbor
+      working-directory: Terraform-Harbor
