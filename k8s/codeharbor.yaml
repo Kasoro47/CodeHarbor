@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: code-harbor
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: code-harbor
+  template:
+    metadata:
+      labels:
+        app: code-harbor
+    spec:
+      containers:
+      - name: code-harbor
+        image: ghcr.io/kasoro47/my-nginx:v1
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+      - name: ghcr-credentials

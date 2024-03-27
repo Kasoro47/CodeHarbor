@@ -7,10 +7,6 @@ terraform {
   }
 }
 
-provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
-
 resource "kubernetes_deployment" "code-harbor" {
   metadata {
     name = "code-harbor"
