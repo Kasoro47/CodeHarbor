@@ -17,7 +17,7 @@ Key Components
 Initial Setup
 -------------
 
-Before deploying our Kubernetes configurations, we prepared our environment with necessary tools including Docker, `kubectl`, and a local Kubernetes cluster using `kind`. The `kind` tool allows us to run Kubernetes locally for testing purposes.
+Before deploying our Kubernetes configurations, we prepared our environment with necessary tools including Docker, `kubectl`, and a local Kubernetes cluster using `kind`. The `kind` tool allows us to run Kubernetes.
 
 ### Installing `kubectl`
 
