@@ -1,21 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: code-harbor
+  name: codeharbor-deployment
 spec:
-  replicas: 2
   selector:
     matchLabels:
-      app: code-harbor
+      app: nginx
+  replicas: 2 # tells deployment to run 2 pods matching the template
   template:
     metadata:
       labels:
-        app: code-harbor
+        app: nginx
     spec:
       containers:
-      - name: code-harbor
-        image: ghcr.io/kasoro47/my-nginx:v1
+      - name: nginx
+        image: nginx:1.16.1
         ports:
         - containerPort: 80
-      imagePullSecrets:
-      - name: ghcr-credentials
