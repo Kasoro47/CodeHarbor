@@ -1,6 +1,6 @@
 #!/bin/bash
 
-scp scripts/codeharbor-kind-deploy.sh k8s/kind-config.yaml k8s/codeharbor.yaml debian@57.128.61.186:~
+scp k8s/kind-config.yaml k8s/codeharbor.yaml debian@57.128.61.186:~
 
 # Define relative paths
 KIND_CONFIG="/home/debian/kind-config.yaml"
