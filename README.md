@@ -31,15 +31,21 @@ The `kubectl` command-line tool allows you to run commands against Kubernetes cl
 
 2.  **Make the kubectl Binary Executable**:
 
-    `chmod +x ./kubectl`
-    
+    ```bash
+    chmod +x ./kubectl
+    ```
+
 3.  **Move the Binary in Your PATH**:
 
-    `sudo mv ./kubectl /usr/local/bin/kubectl`
+    ```bash
+    sudo mv ./kubectl /usr/local/bin/kubectl
+    ```
 
 4.  **Test to Ensure the Version is Up-to-Date**:
 
-    `kubectl version --client`
+    ```bash
+    kubectl version --client
+    ```
 
 ### Installing `kind`
 
@@ -65,6 +71,63 @@ We chose `kind` (Kubernetes IN Docker) for creating our local Kubernetes cluster
 
 This makes `kind` accessible from anywhere on the system, allowing us to create and manage local Kubernetes clusters.
 
+### Installing Docker
+
+Docker is a critical component for running containerized applications, including the local Kubernetes cluster we're setting up with `kind`. Here's a step-by-step guide to installing Docker on your system.
+
+1.  **Update Your System**: Before installing Docker, it's always a good practice to update your system's package index. Execute the following command to do so:
+
+    ```bash
+    sudo apt-get update
+    ```
+
+2.  **Install Docker**:
+
+    Install the Docker's official GPG key and add the Docker's repository to Apt sources:
+
+    ```bash
+    # Add Docker's official GPG key:
+    sudo apt-get install ca-certificates curl
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+    # Add the repository to Apt sources:
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update
+    ```
+
+    Then install Docker's package
+
+    ```bash
+    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    ```
+
+3.  **Verify Docker Installation**:
+
+    To verify that Docker has been installed correctly and that you can run Docker commands without `sudo`, add your user to the `docker` group and relog or reboot:
+
+    ```bash
+    sudo usermod -aG docker $USER
+    ```
+
+    Then, log out and back in for this to take effect, or you can run the following command to activate the changes to groups:
+
+    ```bash
+    newgrp docker
+    ```
+
+    After this, you can test your Docker installation by running:
+
+    ```bash
+    docker run hello-world
+    ```
+
+    This command downloads a test image and runs it in a container. If the container runs successfully, it prints an informational message and exits. If you see the message, it confirms that Docker is installed and working correctly.
+
 Project Structure
 -----------------
 
@@ -77,9 +140,9 @@ Deployment Process
 ------------------
 
 1.  **Build and Push Docker Image**: The GitHub Actions workflow defined in `.github/workflows/terraform.yaml` automates the process of building a Docker image from the Dockerfile and pushing it to a Docker registry. It uses the commit SHA as a tag for each image to ensure version control.
-    
+
 2.  **Applying Kubernetes Configurations**: After the Docker image is pushed to the registry, the same workflow uses `kubectl` to apply the Kubernetes configurations defined in `k8s/codeharbor.yaml`. This step is crucial for deploying the application to the Kubernetes cluster.
-    
+
 3.  **Terraform Deployment**: Initially, the plan was to use Terraform for applying Kubernetes configurations. The `Terraform-Harbor/main.tf` file contains the Terraform setup necessary for deploying the application defined in the Kubernetes YAML configuration. However, this approach requires careful management of Terraform state files and an understanding of how Terraform interacts with Kubernetes resources.
 
 Deployment Automation
@@ -87,37 +150,15 @@ Deployment Automation
 
 To fully automate the deployment of our application within a Kubernetes cluster on an OVH instance, we leverage scripts and configuration files. This section outlines the commands and processes involved in deploying our application, ensuring that all necessary components and configurations are correctly applied to the remote environment.
 
-### Transferring Configuration Files and Scripts
+### Automating Kubernetes Cluster Deployment Remotely
 
-First, we need to transfer our local configuration files and scripts to the OVH instance. This is done using the `scp` command, ensuring that our Kubernetes configurations and the deployment script are available on the remote server.
-
-```bash
-scp scripts/codeharbor-kind-deploy.sh k8s/kind-config.yaml k8s/codeharbor.yaml debian@57.128.61.186:~
-```
-
-### Remote Execution of the Deployment Script
-
-Once the necessary files are on the OVH instance, we execute the deployment script. This script is responsible for creating the Kubernetes cluster using `kind`, applying the Kubernetes configurations, and ensuring that our application is deployed and managed by Kubernetes.
-
-To execute the script remotely, we use the `ssh` command to run the script directly on the OVH instance:
+To execute the script remotely, we use this command to run it from our computer:
 
 ```bash
-`ssh debian@57.128.61.186 "bash ~/codeharbor-kind-deploy.sh"`
+scripts/codeharbor-kind-deploy.sh
 ```
 
-```bash
-sudo usermod -aG docker debian
-```
-
-### Local Script for Remote Execution (Optional)
-
-For convenience, we can also use a local script named `execute-remote.sh` to automate the SSH connection and script execution process. This script encapsulates the `ssh` command, making the deployment process even smoother.
-
-To run this script, ensure it is executable and then execute it from your local machine:
-
-```bash
-`chmod +x execute-remote.sh ./execute-remote.sh`
-```
+This script automates the entire process of deploying a Kubernetes cluster using Kind on a remote Debian server, and then deploying a specified application to this cluster.
 
 Conclusion
 ----------
