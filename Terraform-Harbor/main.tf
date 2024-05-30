@@ -1,12 +1,19 @@
 terraform {
   required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
+    ovh = {
+      source  = "ovh/ovh"
     }
   }
 }
 
+provider "ovh" {
+  endpoint           = "ovh-eu"
+  application_key    = "<your_access_key>"
+  application_secret = "<your_application_secret>"
+  consumer_key       = "<your_consumer_key>"
+}
+
+# Kubernetes deployment
 resource "kubernetes_deployment" "code-harbor" {
   metadata {
     name = "code-harbor"
@@ -36,4 +43,3 @@ resource "kubernetes_deployment" "code-harbor" {
     }
   }
 }
-

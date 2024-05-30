@@ -131,10 +131,27 @@ Docker is a critical component for running containerized applications, including
 Project Structure
 -----------------
 
-*   **Dockerfile**: Contains the Docker configuration to build our application's container image.
-*   **k8s/codeharbor.yaml**: Kubernetes deployment configuration that defines how our application is deployed within the cluster.
-*   **Terraform-Harbor/main.tf**: Terraform configuration that manages the Kubernetes deployment defined in `k8s/codeharbor.yaml`.
-*   **.github/workflows/terraform.yaml**: CI/CD pipeline configuration using GitHub Actions. It automates the process of building the Docker image, pushing it to a registry, and applying the Kubernetes deployment using Terraform.
+**Dockerfile**: Contains the Docker configuration to build our application's container image.
+
+**k8s/codeharbor.yaml**: Kubernetes deployment configuration that defines how our application is deployed within the cluster.
+
+**k8s/network/network-policy.yaml**: Network policies for controlling the traffic flow between pods.
+
+**monitoring/prometheus-config.yaml**: Configuration for Prometheus.
+
+**monitoring/prometheus-deployment.yaml**: Deployment configuration for Prometheus.
+
+**monitoring/grafana-deployment.yaml**: Deployment configuration for Grafana.
+
+**monitoring/ipaddresspool.yaml**: IP address pool configuration for MetalLB.
+
+**monitoring/l2advertisement.yaml**: L2 advertisement configuration for MetalLB.
+
+**scripts/codeharbor-kind-deploy.sh**: Script to deploy the Kubernetes cluster and application.
+
+**Terraform-Harbor/main.tf**: Terraform configuration that manages the Kubernetes deployment defined in k8s/codeharbor.yaml.
+
+**.github/workflows/terraform.yaml**: CI/CD pipeline configuration using GitHub Actions. It automates the process of building the Docker image, pushing it to a registry, and applying the Kubernetes deployment using Terraform.
 
 Deployment Process
 ------------------
@@ -145,12 +162,8 @@ Deployment Process
 
 3.  **Terraform Deployment**: Initially, the plan was to use Terraform for applying Kubernetes configurations. The `Terraform-Harbor/main.tf` file contains the Terraform setup necessary for deploying the application defined in the Kubernetes YAML configuration. However, this approach requires careful management of Terraform state files and an understanding of how Terraform interacts with Kubernetes resources.
 
-Deployment Automation
----------------------
-
-To fully automate the deployment of our application within a Kubernetes cluster on an OVH instance, we leverage scripts and configuration files. This section outlines the commands and processes involved in deploying our application, ensuring that all necessary components and configurations are correctly applied to the remote environment.
-
-### Automating Kubernetes Cluster Deployment Remotely
+Automating Kubernetes Cluster Deployment Remotely
+-------------------------------------------------
 
 To execute the script remotely, we use this command to run it from our computer:
 
@@ -159,6 +172,39 @@ scripts/codeharbor-kind-deploy.sh
 ```
 
 This script automates the entire process of deploying a Kubernetes cluster using Kind on a remote Debian server, and then deploying a specified application to this cluster.
+
+Accessing Grafana from a Remote Computer
+----------------------------------------
+
+#### Ensure External IP is Assigned:
+
+Check the external IP assigned to the Grafana service by running:
+
+```bash
+kubectl get nodes -o wide
+```
+
+Copy the internal IP address of the node where the Grafana service is running.
+
+If you want to access Grafana securely from a remote computer, you can create an SSH tunnel:
+
+#### Create SSH Tunnel:
+
+Run the following command on your remote computer to create an SSH tunnel:
+
+```bash
+ssh -L 3000:internal_ip:32000 debian@instance_ip
+```
+
+This command forwards port 3000 on your local machine to port 32000 on the Kubernetes node.
+
+#### Access Grafana:
+
+Open a web browser on your remote computer and navigate to:
+
+```bash
+http://localhost:3000
+```
 
 Conclusion
 ----------
