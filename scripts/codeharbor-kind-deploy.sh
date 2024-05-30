@@ -8,6 +8,7 @@ KIND_CONFIG="/home/debian/kind-config.yaml"
 DEPLOYMENT_FILE="/home/debian/codeharbor.yaml"
 
 CLUSTER_NAME="codeharbor"
+DOCKER_PASSWORD=$(pass docker)
 
 # Creating kind cluster
 echo "Creating the Kind cluster..."
@@ -20,6 +21,12 @@ ssh debian@57.128.61.186 "kubectl cluster-info --context kind-$CLUSTER_NAME"
 if [ $? -eq 0 ]; then
     echo "Kind cluster is ready. Deploying application..."
     
+    # Create Docker registry secret
+    ssh debian@57.128.61.186 "kubectl create secret docker-registry ghcr-credentials \
+      --docker-server=ghcr.io \
+      --docker-username=kasoro \
+      --docker-password=$DOCKER_PASSWORD"
+
     # Applying deployment file
     ssh debian@57.128.61.186 "kubectl apply -f $DEPLOYMENT_FILE"
     
