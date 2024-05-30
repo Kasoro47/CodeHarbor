@@ -1,8 +1,9 @@
 #!/bin/bash
 
+# Copy configuration files to the Debian instance
 scp k8s/kind-config.yaml k8s/codeharbor.yaml debian@57.128.61.186:~
 
-# Define relative paths
+# Define relative paths on the remote server
 KIND_CONFIG="/home/debian/kind-config.yaml"
 DEPLOYMENT_FILE="/home/debian/codeharbor.yaml"
 
