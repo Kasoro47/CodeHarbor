@@ -48,4 +48,3 @@ jobs:
             --docker-username=\$DOCKER_USERNAME \
             --docker-password=\$DOCKER_PASSWORD
           kubectl apply -f /home/debian/codeharbor.yaml
-          
