@@ -4,15 +4,14 @@ CodeHarbor Project README
 Overview
 --------
 
-The CodeHarbor project focuses on leveraging Infrastructure as Code (IaC) to deploy and manage containerized services within a Kubernetes cluster. This project demonstrates how to automate the deployment process using Terraform for Kubernetes configurations and Docker for containerization, ensuring an efficient, reproducible, and scalable application deployment.
+The CodeHarbor project focuses on leveraging Infrastructure as Code (IaC) to deploy and manage containerized services within a Kubernetes cluster. This project demonstrates how to automate the deployment process using Bash for Kubernetes configurations and Docker for containerization, ensuring an efficient, reproducible, and scalable application deployment.
 
 Key Components
 --------------
 
 *   **Docker**: Used for creating a containerized version of our application.
 *   **Kubernetes**: The target platform for deploying our containerized application.
-*   **Terraform**: Utilized for automating the deployment of Kubernetes configurations.
-*   **GitHub Actions**: Automates the CI/CD pipeline, including building Docker images and applying Kubernetes configurations using Terraform.
+*   **GitHub Actions**: Automates the CI/CD pipeline, including building Docker images and applying Kubernetes configurations using Bash.
 
 Initial Setup
 -------------
@@ -149,18 +148,21 @@ Project Structure
 
 **scripts/codeharbor-kind-deploy.sh**: Script to deploy the Kubernetes cluster and application.
 
-**Terraform-Harbor/main.tf**: Terraform configuration that manages the Kubernetes deployment defined in k8s/codeharbor.yaml.
 
-**.github/workflows/terraform.yaml**: CI/CD pipeline configuration using GitHub Actions. It automates the process of building the Docker image, pushing it to a registry, and applying the Kubernetes deployment using Terraform.
+**.github/workflows/action.yaml**: CI/CD pipeline configuration using GitHub Actions. It automates the process of building the Docker image, pushing it to a registry, and applying the Kubernetes deployment using the Bash script.
 
 Deployment Process
 ------------------
 
-1.  **Build and Push Docker Image**: The GitHub Actions workflow defined in `.github/workflows/terraform.yaml` automates the process of building a Docker image from the Dockerfile and pushing it to a Docker registry. It uses the commit SHA as a tag for each image to ensure version control.
+1.  **Build and Push Docker Image**: The GitHub Actions workflow defined in `.github/workflows/action.yaml` automates the process of building a Docker image from the Dockerfile and pushing it to a Docker registry. It uses the commit SHA as a tag for each image to ensure version control.
 
 2.  **Applying Kubernetes Configurations**: After the Docker image is pushed to the registry, the same workflow uses `kubectl` to apply the Kubernetes configurations defined in `k8s/codeharbor.yaml`. This step is crucial for deploying the application to the Kubernetes cluster.
 
-3.  **Terraform Deployment**: Initially, the plan was to use Terraform for applying Kubernetes configurations. The `Terraform-Harbor/main.tf` file contains the Terraform setup necessary for deploying the application defined in the Kubernetes YAML configuration. However, this approach requires careful management of Terraform state files and an understanding of how Terraform interacts with Kubernetes resources.
+3.  **Monitoring Setup**: The monitoring setup includes deploying Prometheus and Grafana to monitor the application's performance. The configurations for Prometheus and Grafana are defined in `monitoring/prometheus-deployment.yaml` and `monitoring/grafana-deployment.yaml`, respectively.
+
+4.  **Network Policies**: Network policies are essential for controlling the traffic flow between pods within the Kubernetes cluster. The network policies defined in `k8s/network/network-policy.yaml` ensure secure communication between pods.
+
+5.  **MetalLB Configuration**: MetalLB is a load balancer that provides network load balancing to expose services within the Kubernetes cluster. The configurations for MetalLB are defined in `monitoring/ipaddresspool.yaml` and `monitoring/l2advertisement.yaml`.
 
 Automating Kubernetes Cluster Deployment Remotely
 -------------------------------------------------
@@ -209,4 +211,4 @@ http://localhost:3000
 Conclusion
 ----------
 
-The CodeHarbor project showcases a practical implementation of using Docker, Kubernetes, Terraform, and GitHub Actions to automate the deployment of containerized applications. Through this project, we've demonstrated how to prepare a local Kubernetes environment, automate the build and deployment process, and utilize IaC principles for efficient and scalable application management.
+The CodeHarbor project showcases a practical implementation of using Docker, Kubernetes and GitHub Actions to automate the deployment of containerized applications. Through this project, we've demonstrated how to prepare a local Kubernetes environment, automate the build and deployment process, and utilize IaC principles for efficient and scalable application management.
