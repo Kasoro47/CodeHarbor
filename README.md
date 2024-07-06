@@ -4,7 +4,7 @@ CodeHarbor Project README
 Overview
 --------
 
-The CodeHarbor project focuses on leveraging Infrastructure as Code (IaC) to deploy and manage containerized services within a Kubernetes cluster. This project demonstrates how to automate the deployment process using Bash for Kubernetes configurations and Docker for containerization, ensuring an efficient, reproducible, and scalable application deployment.
+The CodeHarbor project focuses on deploying and managing containerized services within a Kubernetes cluster. This project demonstrates how to automate the deployment process using Bash for Kubernetes configurations and Docker for containerization, ensuring an efficient and reproducible application deployment.
 
 Key Components
 --------------
@@ -211,4 +211,4 @@ http://localhost:3000
 Conclusion
 ----------
 
-The CodeHarbor project showcases a practical implementation of using Docker, Kubernetes and GitHub Actions to automate the deployment of containerized applications. Through this project, we've demonstrated how to prepare a local Kubernetes environment, automate the build and deployment process, and utilize IaC principles for efficient and scalable application management.
+The CodeHarbor project showcases a practical implementation of using Docker, Kubernetes and GitHub Actions to automate the deployment of containerized applications. Through this project, we've demonstrated how to prepare a local Kubernetes environment and automate the build and deployment process.
