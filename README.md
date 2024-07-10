@@ -10,13 +10,23 @@ Key Components
 --------------
 
 *   **Docker**: Used for creating a containerized version of our application.
+
 *   **Kubernetes**: The target platform for deploying our containerized application.
+
 *   **GitHub Actions**: Automates the CI/CD pipeline, including building Docker images and applying Kubernetes configurations using Bash.
+
+*  **Helm**: A package manager for Kubernetes that simplifies the deployment of applications and services to a Kubernetes cluster.
+
+*   **Kind**: A tool for running local Kubernetes clusters using Docker container nodes.
+
+*   **MetalLB**: A load balancer for Kubernetes that provides network load balancing to expose services within the cluster.
+
+*   **Prometheus and Grafana**: Monitoring tools for tracking the performance of the application.
 
 Initial Setup
 -------------
 
-Before deploying our Kubernetes configurations, we prepared our environment with necessary tools including Docker, `kubectl`, and a local Kubernetes cluster using `kind`. The `kind` tool allows us to run Kubernetes.
+Before deploying our Kubernetes configurations, I prepared the environment with necessary tools including Docker, `kubectl`, and a local Kubernetes cluster using `kind`. The `kind` tool allows us to run Kubernetes.
 
 ### Installing `kubectl`
 
@@ -48,7 +58,7 @@ The `kubectl` command-line tool allows you to run commands against Kubernetes cl
 
 ### Installing `kind`
 
-We chose `kind` (Kubernetes IN Docker) for creating our local Kubernetes cluster due to its simplicity and the minimal setup required. The installation steps are as follows:
+I chose `kind` (Kubernetes IN Docker) for creating the local Kubernetes cluster due to its simplicity and the minimal setup required. The installation steps are as follows:
 
 1.  Download the `kind` binary suitable for our system architecture. For 64-bit Linux systems, the command is:
 
@@ -72,7 +82,7 @@ This makes `kind` accessible from anywhere on the system, allowing us to create 
 
 ### Installing Docker
 
-Docker is a critical component for running containerized applications, including the local Kubernetes cluster we're setting up with `kind`. Here's a step-by-step guide to installing Docker on your system.
+Docker is a critical component for running containerized applications, including the local Kubernetes cluster I'm setting up with `kind`. Here's a step-by-step guide to installing Docker on your system.
 
 1.  **Update Your System**: Before installing Docker, it's always a good practice to update your system's package index. Execute the following command to do so:
 
@@ -132,22 +142,27 @@ Project Structure
 
 **Dockerfile**: Contains the Docker configuration to build our application's container image.
 
-**k8s/codeharbor.yaml**: Kubernetes deployment configuration that defines how our application is deployed within the cluster.
+**kind-config.yaml**: Configuration file for creating the Kind Kubernetes cluster.
 
-**k8s/network/network-policy.yaml**: Network policies for controlling the traffic flow between pods.
-
-**monitoring/prometheus-config.yaml**: Configuration for Prometheus.
-
-**monitoring/prometheus-deployment.yaml**: Deployment configuration for Prometheus.
-
-**monitoring/grafana-deployment.yaml**: Deployment configuration for Grafana.
-
-**monitoring/ipaddresspool.yaml**: IP address pool configuration for MetalLB.
-
-**monitoring/l2advertisement.yaml**: L2 advertisement configuration for MetalLB.
+* **codeharbor**: Helm chart for deploying the main application.
+Chart.yaml**: Defines the chart and its metadata.
+    - **templates**: Contains Kubernetes manifests for the application.
+    - **values.yaml**: Default configuration values for the chart.
+    - **Chart.yaml**: Defines the chart and its metadata.
+* **metallb**: Helm chart for MetalLB, used for load balancing services in the Kubernetes cluster.
+    - **Chart.yaml**: Defines the chart and its metadata.
+    - **templates**: Contains Kubernetes manifests for MetalLB.
+    - **values.yaml**: Default configuration values for the chart.
+* **monitoring**: Helm chart for monitoring tools like Prometheus and Grafana.
+    - **Chart.yaml**: Defines the chart and its metadata.
+    - **templates**: Contains Kubernetes manifests for monitoring tools.
+    - **values.yaml**: Default configuration values for the chart.
+* **nginx-ingress**: Helm chart for NGINX Ingress Controller.
+    - **Chart.yaml**: Defines the chart and its metadata.
+    - **templates**: Contains Kubernetes manifests for NGINX Ingress Controller.
+    - **values.yaml**: Configuration values for the chart.
 
 **scripts/codeharbor-kind-deploy.sh**: Script to deploy the Kubernetes cluster and application.
-
 
 **.github/workflows/action.yaml**: CI/CD pipeline configuration using GitHub Actions. It automates the process of building the Docker image, pushing it to a registry, and applying the Kubernetes deployment using the Bash script.
 
@@ -156,18 +171,18 @@ Deployment Process
 
 1.  **Build and Push Docker Image**: The GitHub Actions workflow defined in `.github/workflows/action.yaml` automates the process of building a Docker image from the Dockerfile and pushing it to a Docker registry. It uses the commit SHA as a tag for each image to ensure version control.
 
-2.  **Applying Kubernetes Configurations**: After the Docker image is pushed to the registry, the same workflow uses `kubectl` to apply the Kubernetes configurations defined in `k8s/codeharbor.yaml`. This step is crucial for deploying the application to the Kubernetes cluster.
+2.  **Applying Kubernetes Configurations**: After the Docker image is pushed to the registry, the same workflow uses `kubectl` to apply the Kubernetes configurations defined in `charts/kind-config.yaml`. This step is crucial for deploying the application to the Kubernetes cluster.
 
-3.  **Monitoring Setup**: The monitoring setup includes deploying Prometheus and Grafana to monitor the application's performance. The configurations for Prometheus and Grafana are defined in `monitoring/prometheus-deployment.yaml` and `monitoring/grafana-deployment.yaml`, respectively.
+3.  **Monitoring Setup**: The monitoring setup includes deploying Prometheus and Grafana to monitor the application's performance. The configurations for Prometheus and Grafana are defined in `charts/monitoring`.
 
-4.  **Network Policies**: Network policies are essential for controlling the traffic flow between pods within the Kubernetes cluster. The network policies defined in `k8s/network/network-policy.yaml` ensure secure communication between pods.
+4.  **Nginx Ingress Controller**: The Nginx Ingress Controller is used to manage external access to services running within the Kubernetes cluster. The configurations for the Nginx Ingress Controller are defined in `charts/nginx-ingress`.
 
-5.  **MetalLB Configuration**: MetalLB is a load balancer that provides network load balancing to expose services within the Kubernetes cluster. The configurations for MetalLB are defined in `monitoring/ipaddresspool.yaml` and `monitoring/l2advertisement.yaml`.
+5.  **MetalLB Configuration**: MetalLB is a load balancer that provides network load balancing to expose services within the Kubernetes cluster. The configuration for MetalLB is defined in `charts/metallb`.
 
 Automating Kubernetes Cluster Deployment Remotely
 -------------------------------------------------
 
-To execute the script remotely, we use this command to run it from our computer:
+To execute the script remotely, I use this command to run it from my computer:
 
 ```bash
 scripts/codeharbor-kind-deploy.sh
@@ -175,40 +190,46 @@ scripts/codeharbor-kind-deploy.sh
 
 This script automates the entire process of deploying a Kubernetes cluster using Kind on a remote Debian server, and then deploying a specified application to this cluster.
 
-Accessing Grafana from a Remote Computer
+Accessing server from a Remote Computer
 ----------------------------------------
 
 #### Ensure External IP is Assigned:
 
-Check the external IP assigned to the Grafana service by running:
+Check the external IP assigned to the nginx-ingress service by running:
 
 ```bash
-kubectl get nodes -o wide
+kubectl get svc
 ```
 
-Copy the internal IP address of the node where the Grafana service is running.
+Copy the internal IP address of the service where the service is running.
 
-If you want to access Grafana securely from a remote computer, you can create an SSH tunnel:
+If you want to access the web server securely from a remote computer, you can create an SSH tunnel:
 
 #### Create SSH Tunnel:
 
-Run the following command on your remote computer to create an SSH tunnel:
+Run the following command on your remote computer to create an SSH tunnel to access the web server:
 
 ```bash
-ssh -L 3000:internal_ip:32000 debian@instance_ip
+ssh -L 8080:172.18.0.101:80 debian@instance-ip
 ```
 
-This command forwards port 3000 on your local machine to port 32000 on the Kubernetes node.
+This command forwards port 8080 on your local machine to port 80 on the Kubernetes node.
 
-#### Access Grafana:
+If you want to access Grafana the same way:
+
+```bash
+ssh -L 3000:172.18.0.2:32000 debian@instance-ip
+```
+
+#### Access the Web Server:
 
 Open a web browser on your remote computer and navigate to:
 
 ```bash
-http://localhost:3000
+http://localhost:8080
 ```
 
 Conclusion
 ----------
 
-The CodeHarbor project showcases a practical implementation of using Docker, Kubernetes and GitHub Actions to automate the deployment of containerized applications. Through this project, we've demonstrated how to prepare a local Kubernetes environment and automate the build and deployment process.
+The CodeHarbor project showcases a practical implementation of using Docker and Kubernetes to automate the deployment of containerized applications. Through this project, I've demonstrated how to prepare a local Kubernetes environment and automate the build and deployment process.
