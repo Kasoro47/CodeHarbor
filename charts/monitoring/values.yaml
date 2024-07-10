@@ -1,0 +1,15 @@
+grafana:
+  image:
+    repository: grafana/grafana
+    tag: latest
+  service:
+    type: NodePort
+    port: 3000
+    nodePort: 32000
+
+prometheus:
+  image:
+    repository: prom/prometheus
+    tag: latest
+  service:
+    port: 9090

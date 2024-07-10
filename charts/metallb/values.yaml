@@ -1,0 +1,10 @@
+controller:
+  replicaCount: 1
+
+addressPool:
+  addresses:
+    - 172.18.0.100-172.18.0.110
+
+l2advertisement:
+  ipAddressPools:
+    - default

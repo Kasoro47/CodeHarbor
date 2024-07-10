@@ -1,0 +1,15 @@
+replicaCount: 2
+image:
+  repository: nginx
+  tag: "1.16.1"
+service:
+  type: ClusterIP
+  port: 80
+ingress:
+  enabled: true
+  annotations: 
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: 57.128.61.186.nip.io
+      paths:
+        - /

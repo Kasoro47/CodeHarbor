@@ -1,17 +1,13 @@
 #!/bin/bash
 
 # Copy configuration files to the Debian instance
-scp k8s/kind-config.yaml k8s/codeharbor.yaml k8s/network/network-policy.yaml monitoring/prometheus-config.yaml monitoring/prometheus-deployment.yaml monitoring/grafana-deployment.yaml monitoring/ipaddresspool.yaml monitoring/l2advertisement.yaml debian@57.128.61.186:~
+scp -r charts/ debian@57.128.61.186:~
+scp charts/kind-config.yaml debian@57.128.61.186:~
+scp scripts/codeharbor-kind-deploy.sh debian@57.128.61.186:~
 
 # Define relative paths on the remote server
-KIND_CONFIG="/home/debian/kind-config.yaml"
-DEPLOYMENT_FILE="/home/debian/codeharbor.yaml"
-NETWORK_POLICY_FILE="/home/debian/network-policy.yaml"
-PROMETHEUS_CONFIG="/home/debian/prometheus-config.yaml"
-PROMETHEUS_DEPLOYMENT="/home/debian/prometheus-deployment.yaml"
-GRAFANA_DEPLOYMENT="/home/debian/grafana-deployment.yaml"
-METALLB_IP_POOL="/home/debian/ipaddresspool.yaml"
-METALLB_L2_ADVERTISEMENT="/home/debian/l2advertisement.yaml"
+CHARTS_DIR="/home/debian/charts"
+KIND_CONFIG="/home/debian/charts/kind-config.yaml"
 
 CLUSTER_NAME="codeharbor"
 DOCKER_PASSWORD=$(pass docker)
@@ -26,49 +22,50 @@ ssh debian@57.128.61.186 "kubectl cluster-info --context kind-$CLUSTER_NAME"
 
 if [ $? -eq 0 ]; then
     echo "Kind cluster is ready. Deploying application..."
-    
+
+    # Install Helm
+    ssh debian@57.128.61.186 "curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash"
+
+    # Add MetalLB Helm repository
+    ssh debian@57.128.61.186 "helm repo add metallb https://metallb.github.io/metallb"
+
+    # Update Helm repositories
+    ssh debian@57.128.61.186 "helm repo update"
+
     # Create Docker registry secret
     ssh debian@57.128.61.186 "kubectl create secret docker-registry ghcr-credentials \
       --docker-server=ghcr.io \
       --docker-username=kasoro \
       --docker-password=$DOCKER_PASSWORD"
 
-    # Create a namespace for monitoring
+    # Create namespaces
     ssh debian@57.128.61.186 "kubectl create namespace monitoring"
-
-    # Apply deployment file
-    ssh debian@57.128.61.186 "kubectl apply -f $DEPLOYMENT_FILE"
-
-    # Apply network policy
-    ssh debian@57.128.61.186 "kubectl apply -f $NETWORK_POLICY_FILE"
-
-    # Apply Prometheus configuration
-    ssh debian@57.128.61.186 "kubectl apply -f $PROMETHEUS_CONFIG"
-
-    # Deploy Prometheus
-    ssh debian@57.128.61.186 "kubectl apply -f $PROMETHEUS_DEPLOYMENT"
-
-    # Deploy Grafana
-    ssh debian@57.128.61.186 "kubectl apply -f $GRAFANA_DEPLOYMENT"
+    ssh debian@57.128.61.186 "kubectl create namespace metallb-system"
 
     # Deploy MetalLB
     ssh debian@57.128.61.186 << EOF
-      kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.5/config/manifests/metallb-native.yaml
+          kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.5/config/manifests/metallb-native.yaml
 EOF
 
-    # Wait for MetalLB webhook service to be ready
-    echo "Waiting for MetalLB webhook service to be ready..."
-    until ssh debian@57.128.61.186 "kubectl get svc metallb-webhook-service -n metallb-system"; do
-      echo "Waiting for metallb-webhook-service to be created..."
-      sleep 5
-    done
+    # Install MetalLB CRDs
+    ssh debian@57.128.61.186 "kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/main/config/crd/bases/metallb.io_ipaddresspools.yaml"
+    ssh debian@57.128.61.186 "kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/main/config/crd/bases/metallb.io_l2advertisements.yaml"
 
-    # Ensure the webhook service is fully operational
-    sleep 30
+    # Wait for CRDs to be applied
+    echo "Waiting for MetalLB CRDs to be applied..."
+    sleep 20
 
-    # Apply MetalLB configurations
-    ssh debian@57.128.61.186 "kubectl apply -f $METALLB_IP_POOL"
-    ssh debian@57.128.61.186 "kubectl apply -f $METALLB_L2_ADVERTISEMENT"
+    # Deploy MetalLB using Helm
+    ssh debian@57.128.61.186 "helm install metallb $CHARTS_DIR/metallb --namespace metallb-system"
+
+    # Deploy NGINX Ingress Controller using Helm
+    ssh debian@57.128.61.186 "helm install nginx-ingress $CHARTS_DIR/nginx-ingress"
+
+    # Deploy codeharbor using Helm
+    ssh debian@57.128.61.186 "helm install codeharbor $CHARTS_DIR/codeharbor"
+
+    # Deploy monitoring using Helm
+    ssh debian@57.128.61.186 "helm install monitoring $CHARTS_DIR/monitoring --namespace monitoring"
 
     echo "Application deployed successfully."
 else
