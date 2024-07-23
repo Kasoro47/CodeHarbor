@@ -10,6 +10,6 @@ ingress:
   annotations: 
     nginx.ingress.kubernetes.io/rewrite-target: /
   hosts:
-    - host: 57.128.61.186.nip.io
+    - host: instance-ip.nip.io
       paths:
         - /
