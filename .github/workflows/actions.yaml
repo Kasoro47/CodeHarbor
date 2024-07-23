@@ -27,7 +27,7 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
-        ssh -o StrictHostKeyChecking=no debian@57.128.61.186 << EOF
+        ssh -o StrictHostKeyChecking=no debian@instance-ip << EOF
           export DOCKER_SERVER=ghcr.io
           export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
           export DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
